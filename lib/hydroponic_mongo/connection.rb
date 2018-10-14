@@ -1,8 +1,20 @@
 require 'hydroponic_mongo/fake_connection'
+require 'hydroponic_mongo/interpreter'
 
 module HydroponicMongo
   class Connection < Mongo::Server::Connection
     include HydroponicMongo::FakeConnection
+
+    attr_reader :interpreter
+
+    def_delegator :@server, :data
+
+    def initialize(*args)
+      super
+
+      @interpreter = Interpreter.new(self)
+      @buffer = []
+    end
 
     def with_connection
       yield self
@@ -12,6 +24,15 @@ module HydroponicMongo
       true
     end
 
+    def reply(*documents)
+      reply = Mongo::Protocol::Reply.allocate
+      reply.instance_variable_set('@documents', documents.map(&:to_bson))
+      reply.instance_variable_set('@flags', [:await_capable])
+      reply.instance_variable_set('@number_returned', documents.count)
+      reply.instance_variable_set('@starting_from', 0)
+      @buffer.push(reply)
+    end
+
     private
     def deliver(messages)
       write(messages)
@@ -19,7 +40,9 @@ module HydroponicMongo
     end
 
     def write(messages, buffer = BSON::ByteBuffer.new)
-      binding.pry
+      messages.each do |message|
+        interpreter.handle(message)
+      end
       # start_size = 0
       # messages.each do |message|
       #   message.serialize(buffer, max_bson_object_size)
@@ -34,6 +57,7 @@ module HydroponicMongo
 
     def read(request_id = nil)
       binding.pry
+      @buffer.shift
       # ensure_connected do |socket|
       #   Protocol::Message.deserialize(socket, max_message_size, request_id)
       # end

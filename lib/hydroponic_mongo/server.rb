@@ -1,10 +1,14 @@
 require 'hydroponic_mongo/connection'
 require 'hydroponic_mongo/monitor'
+require 'hydroponic_mongo/data'
 
 module HydroponicMongo
   module Server
+    attr_reader :data
+
     def initialize(address, cluster, monitoring, event_listeners, options = {})
       @address = address
+      @data = Data.new(address)
       @cluster = cluster
       @monitoring = monitoring
       @options = options.freeze

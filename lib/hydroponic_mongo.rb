@@ -13,5 +13,4 @@ module Mongo
   end
 end
 
-require 'hydroponic_mongo/connection'
 require 'hydroponic_mongo/server'
