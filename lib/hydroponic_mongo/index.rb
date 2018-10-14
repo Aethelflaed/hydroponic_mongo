@@ -1,9 +1,13 @@
+# frozen_string_literal: true
+
 module HydroponicMongo
   class Index
+    ID_INDEX_NAME = '_id_'
+
     attr_reader :database, :v, :key, :name, :collection
 
-    def initialize(database, key, name, collection)
-      @database = database
+    def initialize(collection, name, key)
+      @database = collection.database
       @v = 2
       @key = key
       @name = name
@@ -11,10 +15,10 @@ module HydroponicMongo
     end
 
     def ns
-      "#{database}.#{collection}"
+      "#{database.name}.#{collection.name}"
     end
 
-    def id_to_bson
+    def to_bson
       BSON::Document.new.tap do |doc|
         doc.store 'v', v
         doc.store 'key', key

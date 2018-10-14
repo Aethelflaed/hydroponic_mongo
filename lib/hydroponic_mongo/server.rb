@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'hydroponic_mongo/connection'
 require 'hydroponic_mongo/monitor'
 require 'hydroponic_mongo/data'

@@ -1,20 +1,18 @@
+# frozen_string_literal: true
+
 module HydroponicMongo
-  class Cursor
+  class Reply::Cursor < Reply
     def initialize(ns, data)
       @ns = ns
       @data = data
     end
 
-    def bson_type
-      BSON::Document::BSON_TYPE
-    end
-
     def to_bson
-      BSON::Document.new.tap do |doc|
-        cursor = BSON::Document.new.tap do |cursor|
+      new_document do |doc|
+        cursor = new_document do |cursor|
           cursor.store('id', 0)
           cursor.store('ns', @ns)
-          cursor.store('firstBatch', @data)
+          cursor.store('firstBatch', @data.map(&:to_bson))
         end
         doc.store('cursor', cursor)
         doc.store('ok', 1.0)

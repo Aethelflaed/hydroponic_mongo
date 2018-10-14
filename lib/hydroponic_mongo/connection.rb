@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'hydroponic_mongo/fake_connection'
 require 'hydroponic_mongo/interpreter'
 
@@ -5,14 +7,10 @@ module HydroponicMongo
   class Connection < Mongo::Server::Connection
     include HydroponicMongo::FakeConnection
 
-    attr_reader :interpreter
-
-    def_delegator :@server, :data
-
     def initialize(*args)
       super
 
-      @interpreter = Interpreter.new(self)
+      @interpreter = Interpreter.new(@server, self)
       @buffer = []
     end
 
@@ -41,8 +39,9 @@ module HydroponicMongo
 
     def write(messages, buffer = BSON::ByteBuffer.new)
       messages.each do |message|
-        interpreter.handle(message)
+        @interpreter.handle(message)
       end
+
       # start_size = 0
       # messages.each do |message|
       #   message.serialize(buffer, max_bson_object_size)

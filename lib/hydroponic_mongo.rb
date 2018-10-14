@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'hydroponic_mongo/version'
 
 require 'active_support'

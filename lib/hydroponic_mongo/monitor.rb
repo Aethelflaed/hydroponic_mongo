@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'hydroponic_mongo/fake_connection'
 
 module HydroponicMongo
