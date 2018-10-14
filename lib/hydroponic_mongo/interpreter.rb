@@ -24,7 +24,7 @@ module HydroponicMongo
     end
 
     def handle(message)
-      binding.pry
+      binding.pry if HydroponicMongo.debug_request
       payload = message.payload
 
       if payload['database_name']

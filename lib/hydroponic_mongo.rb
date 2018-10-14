@@ -7,6 +7,7 @@ require 'active_support/time'
 require 'mongo'
 
 module HydroponicMongo
+  mattr_accessor(:debug_request) { false }
 end
 
 module Mongo

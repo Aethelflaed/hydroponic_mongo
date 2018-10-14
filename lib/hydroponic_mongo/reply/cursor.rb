@@ -7,12 +7,23 @@ module HydroponicMongo
       @data = data
     end
 
+    def data_to_bson
+      @data.map do |value|
+        case value
+        when BSON::Document
+          value
+        else
+          value.to_bson
+        end
+      end
+    end
+
     def to_bson
       new_document do |doc|
         cursor = new_document do |cursor|
           cursor.store('id', 0)
           cursor.store('ns', @ns)
-          cursor.store('firstBatch', @data.map(&:to_bson))
+          cursor.store('firstBatch', data_to_bson)
         end
         doc.store('cursor', cursor)
         doc.store('ok', 1.0)

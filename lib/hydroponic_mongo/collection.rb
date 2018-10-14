@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 require 'hydroponic_mongo/index'
+require 'hydroponic_mongo/transducer'
+require 'hydroponic_mongo/criteria'
 
 module HydroponicMongo
   class Collection
@@ -40,7 +42,21 @@ module HydroponicMongo
       end.uniq.count
     end
 
-    def find(filter = nil, options = {})
+    def find(criteria = {}, options = {})
+      criteria = Criteria.new(criteria)
+
+      if criteria.empty?
+        documents.values
+      elsif criteria.id?
+        [documents[criteria.id]].compact
+      else
+        Transducer.eval(documents.values) do
+          criteria.each do |criterion|
+            filter &criterion
+          end
+          reduce :push
+        end
+      end
     end
 
     private

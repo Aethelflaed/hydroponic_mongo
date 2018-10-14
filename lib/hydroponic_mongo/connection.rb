@@ -55,7 +55,7 @@ module HydroponicMongo
     end
 
     def read(request_id = nil)
-      binding.pry
+      binding.pry if HydroponicMongo.debug_request
       @buffer.shift
       # ensure_connected do |socket|
       #   Protocol::Message.deserialize(socket, max_message_size, request_id)
