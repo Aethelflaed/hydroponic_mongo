@@ -16,5 +16,5 @@ module HydroponicMongo
   end
 end
 
-require 'hydroponic_mongo/reply/count'
+require 'hydroponic_mongo/reply/hash'
 require 'hydroponic_mongo/reply/cursor'

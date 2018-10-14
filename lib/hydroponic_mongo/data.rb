@@ -18,11 +18,15 @@ module HydroponicMongo
 
     def initialize(address)
       @address = address
-      @databases = Hash.new{|h, k| h[k] = Database.new(k)}
+      @databases = Hash.new{|h, k| h[k] = Database.new(self, k)}
     end
 
     def [](name)
       @databases[name]
+    end
+
+    def drop(name)
+      @databases.delete name
     end
   end
 end

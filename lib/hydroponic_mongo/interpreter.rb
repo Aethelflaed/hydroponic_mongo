@@ -19,8 +19,8 @@ module HydroponicMongo
       connection.reply Reply::Cursor.new(name, data)
     end
 
-    def count(n)
-      connection.reply Reply::Count.new(n)
+    def reply_hash(hsh)
+      connection.reply Reply::Hash.new(hsh)
     end
 
     def handle(message)
@@ -40,6 +40,8 @@ module HydroponicMongo
       case payload['command_name'].to_s
       when 'listCollections'
         database_listCollections
+      when 'dropDatabase'
+        database_drop
       else
         if !handle_collection(payload)
           raise StandardError.new("Check how to handle database command: #{payload.inspect}")

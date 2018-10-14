@@ -7,6 +7,12 @@ module HydroponicMongo
         cursor("#{database.name}.$cmd.listCollections",
                database.collections.values)
       end
+
+      def database_drop
+        database.drop
+
+        reply_hash({'dropped' => 'test'})
+      end
     end
   end
 end

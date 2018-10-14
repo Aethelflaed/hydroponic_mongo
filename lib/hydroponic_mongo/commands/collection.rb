@@ -4,7 +4,7 @@ module HydroponicMongo
   module Commands
     module Collection
       def collection_insert(cmd)
-        count collection.insert(cmd['documents'])
+        reply_hash({'n' => collection.insert(cmd['documents'])})
       end
 
       def collection_find(cmd)
