@@ -86,9 +86,10 @@ class Transducer
       }]
     end
 
-    def find(&fn)
-      [nil, -> _, item {
+    def find(ifnone = nil, &fn)
+      [ifnone, -> ifnone, item {
         break item if fn.call(item)
+        ifnone
       }]
     end
   end
@@ -97,7 +98,7 @@ class Transducer
     def eval(enum, &block)
       evaluator = new
       initial = evaluator.instance_exec(&block)
-      if initial.nil?
+      if !evaluator.instance_variable_get('@reduced')
         initial = evaluator.send(:reduce, :push)
       end
       enum.reduce initial, &compose(evaluator.operations)
@@ -141,6 +142,7 @@ class Transducer
   end
 
   def reduce(type = nil)
+    @reduced = true
     if block_given?
       initial, reducer = Reducer.new.instance_exec(&Proc.new)
     else

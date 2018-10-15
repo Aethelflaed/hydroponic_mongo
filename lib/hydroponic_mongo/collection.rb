@@ -2,7 +2,7 @@
 
 require 'hydroponic_mongo/index'
 require 'hydroponic_mongo/transducer'
-require 'hydroponic_mongo/criteria'
+require 'hydroponic_mongo/query'
 
 module HydroponicMongo
   class Collection
@@ -42,20 +42,20 @@ module HydroponicMongo
       end.uniq.count
     end
 
-    def find(criteria = {}, options = {})
-      criteria = Criteria.new(criteria)
+    def find(query = {}, options = {})
+      query = Query.new(query)
 
-      if criteria.empty?
+      if query.empty?
         documents.values
-      elsif criteria.id?
-        [documents[criteria.id]].compact
+      elsif query.id?
+        [documents[query.id]].compact
       else
-        Transducer.eval(documents.values) do
-          criteria.each do |criterion|
+        Transducer.eval(documents) do
+          query.each do |criterion|
             filter &criterion
           end
           reduce :push
-        end
+        end.to_h.values
       end
     end
 

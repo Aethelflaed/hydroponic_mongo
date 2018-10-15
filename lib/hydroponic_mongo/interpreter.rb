@@ -61,6 +61,10 @@ module HydroponicMongo
         collection_insert(command)
       when 'find'
         collection_find(command)
+      when 'update'
+        collection_update(command)
+      when 'findAndModify'
+        collection_findAndModify(command)
       else
         return false
       end

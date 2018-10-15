@@ -11,6 +11,12 @@ module HydroponicMongo
         cursor("#{database.name}.#{collection.name}",
                collection.find(cmd['filter']))
       end
+
+      def collection_update(cmd)
+      end
+
+      def collection_findAndModify(cmd)
+      end
     end
   end
 end
