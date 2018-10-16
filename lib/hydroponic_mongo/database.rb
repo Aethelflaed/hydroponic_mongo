@@ -10,7 +10,7 @@ module HydroponicMongo
     def initialize(data, name)
       @data = data
       @name = name
-      @collections = Hash.new{|h, name| h[name] = Collection.new(self, name)}
+      @collections = Hash.new{|h, k| h[k] = Collection.new(self, k)}
     end
 
     def [](name)

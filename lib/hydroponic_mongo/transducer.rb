@@ -87,9 +87,9 @@ class Transducer
     end
 
     def find(ifnone = nil, &fn)
-      [ifnone, -> ifnone, item {
+      [ifnone, -> _, item {
         break item if (fn ? fn.call(item) : item)
-        ifnone
+        _
       }]
     end
   end

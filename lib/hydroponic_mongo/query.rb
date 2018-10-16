@@ -78,8 +78,8 @@ module HydroponicMongo
           return evaluate_expression(index, doc[index], expr, rest)
         else
           # search in array and set_position
-          set_position(doc.each_with_index.find_index do |sub_doc, index|
-            evaluate_expression(index, sub_doc, expr, path)
+          set_position(doc.each_with_index.find_index do |sub_doc, i|
+            evaluate_expression(i, sub_doc, expr, path)
           end)
         end
       else

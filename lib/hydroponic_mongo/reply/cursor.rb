@@ -20,10 +20,10 @@ module HydroponicMongo
 
     def to_bson
       new_document do |doc|
-        cursor = new_document do |cursor|
-          cursor.store('id', 0)
-          cursor.store('ns', @ns)
-          cursor.store('firstBatch', data_to_bson)
+        cursor = new_document do |c|
+          c.store('id', 0)
+          c.store('ns', @ns)
+          c.store('firstBatch', data_to_bson)
         end
         doc.store('cursor', cursor)
         doc.store('ok', 1.0)
