@@ -97,11 +97,11 @@ class Transducer
   class << self
     def eval(enum, &block)
       evaluator = new
-      initial = evaluator.instance_exec(&block)
-      if !evaluator.instance_variable_get('@reduced')
-        initial = evaluator.send(:reduce, :push)
+      evaluator.instance_exec(&block)
+      if !evaluator.reduced
+        evaluator.send(:reduce, :push)
       end
-      enum.reduce initial, &compose(evaluator.operations)
+      enum.reduce evaluator.initial, &compose(evaluator.operations)
     end
 
     def compose(operations)
@@ -114,42 +114,40 @@ class Transducer
     end
   end
 
-  attr_reader :operations
+  attr_reader :operations, :reduced, :initial
 
   private
   def initialize
+    @reduced = false
     @operations = []
   end
 
   def map(&block)
     @operations.push(Transformations.map(&block))
-    nil
   end
 
   def filter(&block)
     @operations.push(Transformations.filter(&block))
-    nil
   end
 
   def reject(&block)
     @operations.push(Transformations.reject(&block))
-    nil
   end
 
   def compact
     @operations.push(Transformations::COMPACT)
-    nil
   end
 
   def reduce(type = nil)
     @reduced = true
     if block_given?
-      initial, reducer = Reducer.new.instance_exec(&Proc.new)
+      @initial, reducer = Reducer.new.instance_exec(&Proc.new)
+    elsif type
+      @initial, reducer = Reducer.new.public_send(type)
     else
-      initial, reducer = Reducer.new.public_send(type)
+      raise ArgumentError.new("reduce expects a type or a block")
     end
     @operations.push(reducer)
-    return initial
   end
 end
 
