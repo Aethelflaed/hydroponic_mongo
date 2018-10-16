@@ -2,90 +2,110 @@
 
 module HydroponicMongo
   class Query
-    def initialize(query)
-      @query = query
+    attr_reader :position
+
+    def initialize(expressions)
+      @expressions = expressions
+      @position = nil
+    end
+
+    # Set @position if not already set, will be used
+    # to replace a positional operator
+    def set_position(position)
+      if position && @position.nil?
+        @position = position
+      end
+
+      return position
     end
 
     def empty?
-      @query.size == 0
+      @expressions.size == 0
     end
 
     def id?
-      @query.size == 1 && @query.key?('_id')
+      @expressions.size == 1 && @expressions.key?('_id')
     end
 
     def id
-      @query['_id']
+      @expressions['_id']
     end
 
     def each
-      @query.each do |criterion|
-        yield factory(*criterion)
+      @expressions.each do |expression|
+        if (matcher = factory(*expression))
+          yield matcher
+        end
       end
     end
 
     def factory(key, value)
       case key
-      when '$or'
       when '$and'
+        And.to_proc(self, value)
+      when '$nor'
+        Nor.to_proc(self, value)
+      when '$or'
+        Or.to_proc(self, value)
+      when '$comment'
+        # Ignore
       else
-        case value
-        when Hash
-          -> (id, doc) {
-            Operator.to_proc(self, key, value).call(id, doc, key)
-          }
-        else
-          -> (id, doc) {
-            resolve_field_name(doc, key)[1] == value
-          }
-        end
+        expression(key, value)
       end
     end
 
-    def resolve_field_name(doc, name)
-      resolve_field_path(doc, *name.split('.'))
+    def expression(field_name, expr)
+      -> ((id, doc)) {
+        evaluate_expression(id, doc, expr, field_name.split('.', -1))
+      }
     end
 
-    def resolve_field_path(doc, first, *rest)
+    def evaluate_expression(id, doc, expr, path)
+      first, *rest = path
+
       case doc
       when Hash
-        if doc.key?(first)
-          if rest.count == 0
-            return [true, doc[first]]
-          else
-            return resolve_field_path(doc[first], *rest)
-          end
+        if first.nil?
+          return HashExpr.resolve(self, id, doc, expr)
+        elsif doc.key?(first)
+          return evaluate_expression(first, doc[first], expr, rest)
         end
       when Array
-        if first.to_i.to_s == first
-          if rest.count == 0
-            return [true, doc[first.to_i]]
-          else
-            return resolve_field_path(doc[first.to_i], *rest)
-          end
+        index = first.to_i if first.to_i.to_s == first
+        if first.nil?
+          return ArrayExpr.resolve(self, id, doc, expr)
+        elsif index
+          return evaluate_expression(index, doc[index], expr, rest)
         else
-          rest.unshift first
-          query = Query.new(*rest)
-          resolver = ->(value) {
-            resolve_field_path(value, *rest)
-          }
-          rval, @position = Transducer.eval(doc.each_with_index) do
-            # Invert value and index order
-            map{|value, id| [id, value]}
-            map{|id, value| [resolver.call(value), index]}
-            reduce do
-              find{|value, index| value[0]}
-            end
+          # search in array and set_position
+          set_position(doc.each_with_index.find_index do |sub_doc, index|
+            evaluate_expression(index, sub_doc, expr, path)
+          end)
+        end
+      else
+        if first.nil?
+          return ValueExpr.resolve(self, id, doc, expr)
+        else
+          case expr
+          when Hash
+            nonexistent = expr == {'$exists' => false} || expr == {'$not' => {'$exists' => true}}
+            negative = expr.all? {|op, _| ['$not', '$nin', '$ne'].include?(op) }
+
+            return nonexistent || negative
+          else
+            return false
           end
-          binding.pry
-          return rval
         end
       end
-
-      return [false, false]
     end
   end
 end
 
-require 'hydroponic_mongo/query/operator'
+require 'hydroponic_mongo/query/and'
+require 'hydroponic_mongo/query/or'
+require 'hydroponic_mongo/query/nor'
+
+require 'hydroponic_mongo/query/value_expr'
+require 'hydroponic_mongo/query/array_expr'
+require 'hydroponic_mongo/query/hash_expr'
 

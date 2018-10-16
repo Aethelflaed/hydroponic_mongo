@@ -56,28 +56,28 @@ class Transducer
 
     def any?(&fn)
       [false, -> _, item {
-        break true if fn.call(item)
+        break true if (fn ? fn.call(item) : item)
         false
       }]
     end
 
     def none?(&fn)
       [false, -> _, item {
-        break false if fn.call(item)
+        break false if (fn ? fn.call(item) : item)
         true
       }]
     end
 
     def all?(&fn)
       [true, -> result, item {
-        break false if !fn.call(item)
+        break false if !(fn ? fn.call(item) : item)
         true
       }]
     end
 
     def one?(&fn)
       [false, -> one, item {
-        if fn.call(i)
+        if (fn ? fn.call(item) : item)
           break false if one
           true
         else
@@ -88,7 +88,7 @@ class Transducer
 
     def find(ifnone = nil, &fn)
       [ifnone, -> ifnone, item {
-        break item if fn.call(item)
+        break item if (fn ? fn.call(item) : item)
         ifnone
       }]
     end

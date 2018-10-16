@@ -54,8 +54,12 @@ module HydroponicMongo
           query.each do |criterion|
             filter &criterion
           end
+
+          # Keep only the document
+          map {|id, doc| doc }
+
           reduce :push
-        end.to_h.values
+        end
       end
     end
 
