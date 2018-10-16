@@ -31,6 +31,8 @@ module HydroponicMongo
           doc != arg
         when '$nin'
           !arg.include?(doc)
+        else
+          raise StandardError.new("In query #{query.inspect}, don't know how to handle #{op} => #{arg} for #{id} => #{doc}")
         end
       end
     end

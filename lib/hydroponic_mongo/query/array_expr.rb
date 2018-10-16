@@ -41,6 +41,8 @@ module HydroponicMongo
           end
         when '$nin'
           (arg & doc).empty?
+        else
+          raise StandardError.new("In query #{query.inspect}, don't know how to handle #{op} => #{arg} for #{id} => #{doc}")
         end
       end
     end
