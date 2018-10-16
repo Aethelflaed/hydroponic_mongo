@@ -85,28 +85,30 @@ module HydroponicMongo
         query_options['limit'] = 1
       else
         if update.keys.first[0] != '$'
-          raise WriteError.new({
-            'index' => 0,
-            'code' => 9,
-            'errmsg' => "multi update only works with $ operators"
-          })
+          raise WriteError.new(9, "multi update only works with $ operators")
         end
       end
 
       documents = find(query, query_options)
       count = documents.size
       modified = 0
+      upserted = []
 
-      documents.each do |document|
-        if update_one(document, update, options)
-          modified += 1
+      if documents.empty?
+        if options['upsert']
+          upserted.push upsert(update, options)['_id']
+        end
+      else
+        documents.each do |document|
+          if update_one(document, update, options)
+            modified += 1
+          end
         end
       end
 
-      return [count, modified]
+      return [count, modified, upserted]
     end
 
-    private
     def insert_one(document)
       if !document.has_key?('_id')
         document.store '_id', BSON::ObjectId.new
@@ -116,13 +118,27 @@ module HydroponicMongo
       document['_id']
     end
 
-    def update_one(document, update, options)
+    def upsert(update, options = {})
+      doc = BSON::Document.new
+      update_one(doc, options.merge('upserting' => true))
+      id = (doc['_id'] ||= BSON::ObjectId.new)
+
+      documents[id] = doc
+
+      return doc
+    end
+
+    def update_one(document, update, options = {})
       if update.keys.first[0] == '$'
         # using update operators
         Update.apply(document, update, options)
       else
         # replace document
-        update.delete('_id') # make sure we don't override the _id
+
+        # make sure we don't override the _id
+        if !options['upserting']
+          update.delete('_id')
+        end
 
         # Delete all fields
         document.delete_if{|k, v| k != '_id'}
@@ -132,6 +148,10 @@ module HydroponicMongo
 
         return true
       end
+    end
+
+    def delete_one(id)
+      documents.delete(id)
     end
   end
 end

@@ -1,15 +1,12 @@
 module HydroponicMongo
   class Error < StandardError
-    attr_reader :values
-    def initialize(type, values)
-      super(type)
-      @values = values
+    attr_reader :code
+    def initialize(code, errmsg)
+      @code = code
+      super(errmsg)
     end
   end
 
   class WriteError < Error
-    def initialize(hsh)
-      super('writeErrors', [hsh])
-    end
   end
 end

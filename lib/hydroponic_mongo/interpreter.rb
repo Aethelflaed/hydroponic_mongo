@@ -61,6 +61,8 @@ module HydroponicMongo
         collection_insert(command)
       when 'find'
         collection_find(command)
+      when 'count'
+        collection_count(command)
       when 'update'
         collection_update(command)
       when 'findAndModify'
