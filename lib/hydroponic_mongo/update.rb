@@ -27,9 +27,6 @@ module HydroponicMongo
             document[k] = v
           modified = true
         end
-      when '$currentDate'
-        # check the date format before implementing...
-        raise NotImplementedError.new
       when '$min'
         values.each do |k, v|
           if !document.key?(k) || v < document[k]
@@ -58,11 +55,43 @@ module HydroponicMongo
             modified = true
           end
         end
+      when '$push'
+        values.each do |field, value|
+          doc, key = resolve_field_path(document, field, field.split('.', -1))
+          if !doc.key?(key)
+            doc[key] = []
+          end
+          if !doc[key].is_a?(Array)
+            raise WriteError.new(16837, "The field '#{field}' must be an array but if of type #{doc[key].class} in document {_id: #{document['_id']}}")
+          end
+
+          if value.is_a?(Hash) && value.keys.first[0] == '$'
+            raise NotImplementedError.new("$push with modifiers not yet implemented")
+          else
+            doc[key].push(value)
+          end
+        end
+
+      when '$currentDate'
+        raise NotImplementedError.new("Need to check the date format before implementing $currentDate")
       else
         raise NotImplementedError.new("Not implemented update operator #{op}")
       end
 
       return modified
+    end
+
+    def self.resolve_field_path(document, field, path)
+      first, *rest = path
+      if rest.empty?
+        return [document, first]
+      else
+        if document.key?(first)
+          resolve_field_path(document[first], field, rest)
+        else
+          raise WriteError.new(56, "The update path '#{field}' contains an empty field name, which is not allowed.")
+        end
+      end
     end
   end
 end
