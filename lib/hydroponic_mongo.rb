@@ -17,3 +17,4 @@ module Mongo
 end
 
 require 'hydroponic_mongo/server'
+require 'hydroponic_mongo/errors'
