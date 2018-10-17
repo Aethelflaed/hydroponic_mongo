@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
+require 'transducer'
 require 'hydroponic_mongo/index'
-require 'hydroponic_mongo/transducer'
 require 'hydroponic_mongo/query'
 require 'hydroponic_mongo/update'
 
@@ -59,14 +59,13 @@ module HydroponicMongo
         else
           Transducer.eval(documents) do
             query.each do |criterion|
-              filter &criterion
+              filter(&criterion)
             end
 
             # Keep only the document
             map {|id, doc| doc }
 
-            reduce :push
-          end
+          end.to_a
         end
 
       if options['skip']
