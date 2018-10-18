@@ -5,7 +5,7 @@ module HydroponicMongo
         -> ((id, doc)) {
           expressions.all? do |expression|
             expression.all? do |key, value|
-              query.expression(key, value).call(id, doc)
+              query.expression(key, value).call([id, doc])
             end
           end
         }
