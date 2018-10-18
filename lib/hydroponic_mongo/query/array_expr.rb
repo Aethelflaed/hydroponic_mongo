@@ -3,47 +3,31 @@
 module HydroponicMongo
   class Query
     module ArrayExpr
-      def self.resolve(query, id, doc, expr)
-        if expr.is_a?(Hash) && expr.keys.first[0] == '$'
-          expr.all? do |op, arg|
-            resolve_op(query, id, doc, op, arg)
-          end
-        elsif expr.is_a?(Array)
-          doc == expr
+      include ValueExpr
+      extend self
+
+      define_method('$eq') do |doc, arg|
+        if arg.is_a?(Array)
+          doc == arg
         else
-          doc.include?(expr)
+          doc.include?(arg)
         end
       end
 
-      def self.resolve_op(query, id, doc, op, arg)
-        case op
-        when '$eq'
-          if arg.is_a?(Array)
-            doc == arg
-          else
-            doc.include?(arg)
-          end
-        when '$gt'
-          doc > arg
-        when '$gte'
-          doc >= arg
-        when '$in'
-          (arg & doc).present?
-        when '$lt'
-          doc < arg
-        when '$lte'
-          doc <= arg
-        when '$ne'
-          if arg.is_a?(Array)
-            doc != arg
-          else
-            !doc.include?(arg)
-          end
-        when '$nin'
-          (arg & doc).empty?
+      define_method('$ne') do |doc, arg|
+        if arg.is_a?(Array)
+          doc != arg
         else
-          raise StandardError.new("In query #{query.inspect}, don't know how to handle #{op} => #{arg} for #{id} => #{doc}")
+          !doc.include?(arg)
         end
+      end
+
+      define_method('$in') do |doc, arg|
+        (doc & arg).present?
+      end
+
+      define_method('$nin') do |doc, arg|
+        (doc & arg).empty?
       end
     end
   end
