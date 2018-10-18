@@ -24,7 +24,6 @@ module HydroponicMongo
     end
 
     def handle(message)
-      binding.pry if HydroponicMongo.debug_request
       payload = message.payload
 
       if payload['database_name']
@@ -35,7 +34,7 @@ module HydroponicMongo
     end
 
     def handle_database(payload)
-      @database = server.data[payload['database_name']]
+      @database = server.databases[payload['database_name']]
 
       case payload['command_name'].to_s
       when 'listCollections'

@@ -2,15 +2,14 @@
 
 require 'hydroponic_mongo/connection'
 require 'hydroponic_mongo/monitor'
-require 'hydroponic_mongo/data'
+require 'hydroponic_mongo/database'
 
 module HydroponicMongo
   module Server
-    attr_reader :data
+    attr_reader :databases
 
     def initialize(address, cluster, monitoring, event_listeners, options = {})
       @address = address
-      @data = Data.new(address)
       @cluster = cluster
       @monitoring = monitoring
       @options = options.freeze
@@ -22,10 +21,16 @@ module HydroponicMongo
       monitor.scan!
       monitor.run!
       ObjectSpace.define_finalizer(self, self.class.finalize(monitor))
+
+      @databases = Hash.new{|h, k| h[k] = Database.new(self, k)}
     end
 
     def pool
       @connection ||= HydroponicMongo::Connection.new(self, self.options)
+    end
+
+    def dropDatabase(name)
+      @databases.delete(name)
     end
   end
 end

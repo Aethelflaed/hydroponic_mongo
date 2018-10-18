@@ -41,25 +41,10 @@ module HydroponicMongo
       messages.each do |message|
         @interpreter.handle(message)
       end
-
-      # start_size = 0
-      # messages.each do |message|
-      #   message.serialize(buffer, max_bson_object_size)
-      #   if max_message_size &&
-      #       (buffer.length - start_size) > max_message_size
-      #     raise Error::MaxMessageSize.new(max_message_size)
-      #     start_size = buffer.length
-      #   end
-      # end
-      # ensure_connected{ |socket| socket.write(buffer.to_s) }
     end
 
     def read(request_id = nil)
-      binding.pry if HydroponicMongo.debug_request
       @buffer.shift
-      # ensure_connected do |socket|
-      #   Protocol::Message.deserialize(socket, max_message_size, request_id)
-      # end
     end
   end
 end

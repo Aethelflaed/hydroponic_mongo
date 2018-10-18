@@ -11,7 +11,7 @@ module HydroponicMongo
       def database_drop
         database.drop
 
-        reply_hash({'dropped' => 'test'})
+        reply_hash({'dropped' => database.name})
       end
     end
   end

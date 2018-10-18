@@ -7,8 +7,8 @@ module HydroponicMongo
     attr_reader :name
     attr_reader :collections
 
-    def initialize(data, name)
-      @data = data
+    def initialize(server, name)
+      @server = server
       @name = name
       @collections = Hash.new{|h, k| h[k] = Collection.new(self, k)}
     end
@@ -19,7 +19,7 @@ module HydroponicMongo
     alias_method :collection, :[]
 
     def drop
-      @data.drop(name)
+      @server.dropDatabase(name)
     end
   end
 end
