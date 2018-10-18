@@ -68,8 +68,9 @@ module HydroponicMongo
         document = collection.find(cmd['query'], query_options).first
 
         if document
+          rval['value'] = document
+
           if cmd['remove']
-            rval['value'] = document
             collection.delete_one(document['_id'])
           else # update
             if !cmd['new']

@@ -44,33 +44,19 @@ module HydroponicMongo
     end
 
     def find(query = {}, options = {})
-      query = Query.new(query)
+      query = Query.new(query, self, options)
 
       # TODO:
-      # Handle options, e.g.:
+      # Handle options:
       # - options['sort']
       # - options['projection']
 
-      result =
-        if query.empty?
-          documents.values
-        elsif query.id?
-          [documents[query.id]].compact
-        else
-          Transducer.eval(documents) do
-            query.each do |criterion|
-              filter(&criterion)
-            end
-
-            # Keep only the document
-            map {|id, doc| doc }
-
-          end.to_a
-        end
+      result = query.documents
 
       if options['skip']
         result = result[options['skip']..-1]
       end
+
       if options['limit']
         result = result[0..options['limit']]
       end
@@ -88,10 +74,13 @@ module HydroponicMongo
         end
       end
 
-      documents = find(query, query_options)
+      query = Query.new(query, self, query_options)
+
+      documents = query.documents
       count = documents.size
       modified = 0
       upserted = []
+      options['position'] = query.position
 
       if documents.empty?
         if options['upsert']

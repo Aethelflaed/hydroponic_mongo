@@ -2,10 +2,15 @@
 
 module HydroponicMongo
   class Query
+    attr_reader :expressions
+    attr_reader :collection
+    attr_reader :options
     attr_reader :position
 
-    def initialize(expressions)
+    def initialize(expressions, collection, options = {})
       @expressions = expressions
+      @collection = collection
+      @options = options
       @position = nil
     end
 
@@ -19,23 +24,24 @@ module HydroponicMongo
       return position
     end
 
-    def empty?
-      @expressions.size == 0
-    end
+    def documents
+      if expressions.empty?
+        collection.documents.values
+      elsif expressions.size == 1 && expressions.key?('_id')
+        [collection.documents[expressions['_id']]].compact
+      else
+        transducer = Transducer.new(collection.documents)
 
-    def id?
-      @expressions.size == 1 && @expressions.key?('_id')
-    end
-
-    def id
-      @expressions['_id']
-    end
-
-    def each
-      @expressions.each do |expression|
-        if (matcher = factory(*expression))
-          yield matcher
+        expressions.each do |expression|
+          if (matcher = factory(*expression))
+            transducer.filter(&matcher)
+          end
         end
+
+        # Keep only the document
+        transducer.map{|id, doc| doc}
+
+        transducer.to_a
       end
     end
 

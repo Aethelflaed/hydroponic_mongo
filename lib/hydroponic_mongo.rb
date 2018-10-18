@@ -8,6 +8,7 @@ require 'active_support/core_ext'
 require 'mongo'
 
 module HydroponicMongo
+  mattr_accessor(:debug) {false}
 end
 
 module Mongo

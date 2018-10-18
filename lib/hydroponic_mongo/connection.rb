@@ -39,6 +39,9 @@ module HydroponicMongo
 
     def write(messages, buffer = BSON::ByteBuffer.new)
       messages.each do |message|
+        if HydroponicMongo.debug
+          binding.pry
+        end
         @interpreter.handle(message)
       end
     end
