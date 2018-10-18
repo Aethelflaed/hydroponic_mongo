@@ -5,7 +5,7 @@ require 'hydroponic_mongo/interpreter'
 
 module HydroponicMongo
   class Connection < Mongo::Server::Connection
-    include HydroponicMongo::FakeConnection
+    include FakeConnection
 
     def initialize(*args)
       super
