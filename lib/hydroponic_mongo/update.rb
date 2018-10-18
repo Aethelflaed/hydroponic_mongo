@@ -6,7 +6,7 @@ module HydroponicMongo
       modified = false
 
       update.each do |op, values|
-        modified ||= apply_op(document, op, values, options)
+        modified = apply_op(document, op, values, options) || modified
       end
 
       return modified
@@ -18,7 +18,7 @@ module HydroponicMongo
       case op
       when '$set'
         values.each do |k, v|
-          modified ||= (document[k] != document[k] = v)
+          modified = (document[k] != (document[k] = v)) || modified
         end
       when '$inc'
         values.each do |k, v|

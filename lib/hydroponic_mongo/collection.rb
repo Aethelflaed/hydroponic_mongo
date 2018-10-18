@@ -119,7 +119,7 @@ module HydroponicMongo
 
     def upsert(update, options = {})
       doc = BSON::Document.new
-      update_one(doc, options.merge('upserting' => true))
+      update_one(doc, update, options.merge('upserting' => true))
       id = (doc['_id'] ||= BSON::ObjectId.new)
 
       documents[id] = doc
