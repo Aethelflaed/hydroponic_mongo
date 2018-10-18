@@ -66,10 +66,10 @@ class Transducer
     raise AlreadyReducedError.new if @reduced
     @reduced = true
     if block_given?
-      initial, reducer = Reducers.instance_exec(&Proc.new)
+      initial, reducer, finalizer = Reducers.instance_exec(&Proc.new)
     elsif type
       args.unshift type
-      initial, reducer = Reducers.public_send(*args)
+      initial, reducer, finalizer = Reducers.public_send(*args)
     else
       raise ArgumentError.new("reduce expects a type or a block")
     end
@@ -77,7 +77,11 @@ class Transducer
     @operations.push(reducer)
 
     catch :break do
-      @enum.reduce initial, &compose(@operations)
+      if finalizer
+        finalizer.call(@enum.reduce initial, &compose(@operations))
+      else
+        @enum.reduce initial, &compose(@operations)
+      end
     end
   end
 

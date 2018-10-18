@@ -97,5 +97,79 @@ class Transducer
         _
       }]
     end
+
+    def sort(&fn)
+      [[], -> result, item {
+        if fn
+          insert_sorted_fn(result, item, 0, result.size, fn)
+        else
+          insert_sorted(result, item, 0, result.size)
+        end
+      }]
+    end
+
+    def sort_by(&fn)
+      [[], -> result, item {
+        insert_sorted_fn(result,
+                         [fn.call(item), item],
+                         0, result.size,
+                         -> a, b { a[0] <=> b[0] })
+      }, -> array {
+        array.map {|sort_key, item| item}
+      }]
+    end
+
+    private
+    def insert_sorted(array, item, from, to)
+      if (size = to - from) == 0
+        array.insert(from, item)
+      else
+        half = from + size / 2
+        res = item <=> array[half]
+        if half == from
+          if res <= 0
+            array.insert(from, item)
+          else
+            array.insert(from + 1, item)
+          end
+        else
+          if res < 0
+            insert_sorted(array, item, from, half)
+          elsif res > 0
+            insert_sorted(array, item, half, to)
+          else
+            array.insert(half, item)
+          end
+        end
+      end
+
+      return array
+    end
+
+    def insert_sorted_fn(array, item, from, to, fn)
+      if (size = to - from) == 0
+        array.insert(from, item)
+      else
+        half = from + size / 2
+        res = fn.call(item, array[half])
+        if half == from
+          if res <= 0
+            array.insert(from, item)
+          else
+            array.insert(from + 1, item)
+          end
+        else
+          if res < 0
+            insert_sorted_fn(array, item, from, half, fn)
+          elsif res > 0
+            insert_sorted_fn(array, item, half, to, fn)
+          else
+            array.insert(half, item)
+          end
+        end
+      end
+
+      return array
+    end
   end
 end

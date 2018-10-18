@@ -111,4 +111,20 @@ class TransducerTest < ActiveSupport::TestCase
       @transducer.reduce
     end
   end
+
+  test 'reduce with finalizer' do
+    Person = Struct.new(:firstname, :age)
+
+    p1 = Person.new('Hello', 23)
+    p2 = Person.new('JK', 32)
+    p3 = Person.new('ufhdjks', 44)
+    p4 = Person.new('ioufsjk', 33)
+    p5 = Person.new('(8fjke k', 42)
+    p6 = Person.new('jklsfbkj ', 3)
+
+    enum = [p1, p2, p3, p4, p5, p6]
+
+    @transducer = Transducer.new(enum)
+    assert_equal [p6, p1, p2, p4, p5, p3], @transducer.reduce{sort_by(&:age)}
+  end
 end
