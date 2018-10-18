@@ -25,10 +25,13 @@ module HydroponicMongo
     end
 
     def documents
+      transducer = nil
+
       if expressions.empty?
-        collection.documents.values
+        transducer = Transducer.new(collection.documents.values)
       elsif expressions.size == 1 && expressions.key?('_id')
-        [collection.documents[expressions['_id']]].compact
+        transducer = Transducer.new([collection.documents[expressions['_id']]])
+        transducer.compact
       else
         transducer = Transducer.new(collection.documents)
 
@@ -40,9 +43,26 @@ module HydroponicMongo
 
         # Keep only the document
         transducer.map{|id, doc| doc}
-
-        transducer.to_a
       end
+
+      if (sort = options['sort'])
+        transducer = transducer.reduce do
+          sort do |a, b|
+            value = sort.each do |key, dir|
+              value = if dir > 0
+                        a[key] <=> b[key]
+                      else
+                        b[key] <=> a[key]
+                      end
+
+              break value if value != 0
+            end
+
+            value.is_a?(Hash) ? 0 : value
+          end
+        end
+      end
+      transducer.to_a
     end
 
     def factory(key, value)

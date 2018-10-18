@@ -48,7 +48,6 @@ module HydroponicMongo
 
       # TODO:
       # Handle options:
-      # - options['sort']
       # - options['projection']
 
       result = query.documents

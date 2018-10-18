@@ -59,5 +59,7 @@ class HydroponicMongoTest < ActiveSupport::TestCase
     }, upsert: true)
 
     assert_equal 4, @db.find(_id: 4).first['a']
+
+    assert_equal [4, 3, 2, 1], @db.find({}).sort('a' => -1).map{|x| x['a']}
   end
 end
