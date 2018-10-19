@@ -44,7 +44,7 @@ module HydroponicMongo
     end
 
     def find(query = {}, options = {})
-      query = Query.new(query, self, options)
+      query = Query.new(query, documents, options)
 
       # TODO:
       # Handle options:
@@ -73,7 +73,7 @@ module HydroponicMongo
         end
       end
 
-      query = Query.new(query, self, query_options)
+      query = Query.new(query, documents, query_options)
 
       documents = query.documents
       count = documents.size

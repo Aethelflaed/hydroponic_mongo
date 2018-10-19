@@ -7,37 +7,26 @@ module HydroponicMongo
     include Query::Logical
 
     attr_reader :expressions
-    attr_reader :collection
     attr_reader :options
     attr_reader :position
 
-    def initialize(expressions, collection, options = {})
+    def initialize(expressions, documents, options = {})
       @expressions = expressions
-      @collection = collection
+      @documents = documents
       @options = options
       @position = nil
-    end
-
-    # Set @position if not already set, will be used
-    # to replace a positional operator
-    def set_position(position)
-      if position && @position.nil?
-        @position = position
-      end
-
-      return position
     end
 
     def documents
       transducer = nil
 
       if expressions.empty?
-        transducer = Transducer.new(collection.documents.values)
+        transducer = Transducer.new(@documents.values)
       elsif expressions.size == 1 && expressions.key?('_id')
-        transducer = Transducer.new([collection.documents[expressions['_id']]])
+        transducer = Transducer.new([@documents[expressions['_id']]])
         transducer.compact
       else
-        transducer = Transducer.new(collection.documents)
+        transducer = Transducer.new(@documents)
 
         expressions.each do |expression|
           if (matcher = factory(*expression))
@@ -49,10 +38,10 @@ module HydroponicMongo
         transducer.map{|id, doc| doc}
       end
 
-      if (sort = options['sort'])
+      if (sort_fields = options['sort'])
         transducer = transducer.reduce do
           sort do |a, b|
-            value = sort.each do |key, dir|
+            value = sort_fields.each do |key, dir|
               value = if dir > 0
                         a[key] <=> b[key]
                       else
@@ -86,11 +75,11 @@ module HydroponicMongo
 
     def expression(field_name, expr)
       -> ((id, doc)) {
-        evaluate_expression(id, doc, expr, field_name.split('.', -1))
+        evaluate(id, doc, expr, field_name.split('.', -1))
       }
     end
 
-    def evaluate_expression(id, doc, expr, path)
+    def evaluate(id, doc, expr, path)
       first, *rest = path
 
       case doc
@@ -98,34 +87,48 @@ module HydroponicMongo
         if first.nil?
           return HashExpr.resolve(self, id, doc, expr)
         elsif doc.key?(first)
-          return evaluate_expression(first, doc[first], expr, rest)
+          return evaluate(first, doc[first], expr, rest)
+        else
+          check_nonexistent_or_negative(expr)
         end
+
       when Array
         index = first.to_i if first.to_i.to_s == first
         if first.nil?
           return ArrayExpr.resolve(self, id, doc, expr)
         elsif index
-          return evaluate_expression(index, doc[index], expr, rest)
+          return evaluate(index, doc[index], expr, rest)
         else
-          # search in array and set_position
-          set_position(doc.each_with_index.find_index do |sub_doc, i|
-            evaluate_expression(i, sub_doc, expr, path)
-          end)
+          # search in array and set position if needed
+          position = doc.each_with_index.find_index do |sub_doc, i|
+            evaluate(i, sub_doc, expr, path)
+          end
+          # The first found position is stored, it may be used in an update
+          # operation in place of the position operator $
+          if position && @position.nil?
+            @position = position
+          end
+          return position
         end
+
       else
         if first.nil?
           return ValueExpr.resolve(self, id, doc, expr)
         else
-          case expr
-          when Hash
-            nonexistent = expr == {'$exists' => false} || expr == {'$not' => {'$exists' => true}}
-            negative = expr.all? {|op, _| ['$not', '$nin', '$ne'].include?(op) }
-
-            return nonexistent || negative
-          else
-            return false
-          end
+          check_nonexistent_or_negative(expr)
         end
+      end
+    end
+
+    def check_nonexistent_or_negative(expr)
+      case expr
+      when Hash
+        nonexistent = expr == {'$exists' => false} || expr == {'$not' => {'$exists' => true}}
+        negative = expr.all? {|op, _| ['$not', '$nin', '$ne'].include?(op) }
+
+        return nonexistent || negative
+      else
+        return false
       end
     end
   end
