@@ -3,6 +3,33 @@ require 'test_helper'
 module HydroponicMongo
   class QueryTest < ActiveSupport::TestCase
     test 'documents' do
+      documents = [
+        {'a' => 1, 'b' => 2},
+        {'a' => 2, 'b' => 2},
+        {'a' => 2, 'b' => 1},
+        {'a' => 1, 'b' => 1},
+      ]
+      expressions = {
+        '$and' => [{'a' => 1}, {'b' => 1}],
+      }
+      options = {}
+      assert_equal [{'a' => 1, 'b' => 1}],
+        Query.new(expressions, documents, options).documents
+
+      expressions = {
+        '$or' => [{'b' => 1}, {'b' => 2}],
+        'a' => {'$lt' => 2},
+      }
+      options['sort'] = {'b' => -1}
+      assert_equal [{'a' => 1, 'b' => 2}, {'a' => 1, 'b' => 1}],
+        Query.new(expressions, documents, options).documents
+
+      expressions = {
+        '$nor' => [{'b' => 2}],
+      }
+      options['sort'] = {'a' => 1}
+      assert_equal [{'a' => 1, 'b' => 1}, {'a' => 2, 'b' => 1}],
+        Query.new(expressions, documents, options).documents
     end
 
     test 'evaluate' do
