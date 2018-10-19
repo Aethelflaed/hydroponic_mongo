@@ -14,7 +14,7 @@ module HydroponicMongo
       @name = name
       @options = {}
       @info = {'readOnly' => false}
-      @documents = {}
+      @documents = []
       @indices = {}
       @indices[Index::ID_INDEX_NAME] = Index.new(self, Index::ID_INDEX_NAME, {'_id' => 1})
     end
@@ -97,20 +97,17 @@ module HydroponicMongo
     end
 
     def insert_one(document)
-      if !document.has_key?('_id')
-        document.store '_id', BSON::ObjectId.new
-      end
-      documents[document['_id']] = document
+      id = (document['_id'] ||= BSON::ObjectId.new)
+      documents.push(document)
 
-      document['_id']
+      return id
     end
 
     def upsert(update, options = {})
       doc = BSON::Document.new
       update_one(doc, update, options.merge('upserting' => true))
-      id = (doc['_id'] ||= BSON::ObjectId.new)
 
-      documents[id] = doc
+      insert_one(doc)
 
       return doc
     end

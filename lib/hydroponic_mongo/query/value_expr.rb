@@ -5,13 +5,13 @@ module HydroponicMongo
     module ValueExpr
       extend self
 
-      def resolve(query, id, doc, expr)
+      def resolve(query, doc, expr)
         if expr.is_a?(Hash) && expr.keys.first[0] == '$'
           expr.all? do |op, arg|
             if respond_to?(op)
               public_send(op, doc, arg)
             else
-              raise StandardError.new("In query #{query.inspect}, don't know how to handle #{op} => #{arg} for #{id} => #{doc}")
+              raise StandardError.new("In query #{query.inspect}, don't know how to handle #{op} => #{arg} for #{doc}")
             end
           end
         else

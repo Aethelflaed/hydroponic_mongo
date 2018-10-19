@@ -15,7 +15,7 @@ module HydroponicMongo
             doc, key = resolve_field_path(document, field, field.split('.', -1), options)
             begin
               modified = public_send(op, doc, key, value) || modified
-            rescue ArrayExpected => e
+            rescue ArrayExpected
               raise WriteError.new(16837, "The field '#{field}' must be an array but is of type #{doc[key].class} in document {_id: #{document['_id']}}")
             end
           end

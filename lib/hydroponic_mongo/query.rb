@@ -18,24 +18,12 @@ module HydroponicMongo
     end
 
     def documents
-      transducer = nil
+      transducer = Transducer.new(@documents)
 
-      if expressions.empty?
-        transducer = Transducer.new(@documents.values)
-      elsif expressions.size == 1 && expressions.key?('_id')
-        transducer = Transducer.new([@documents[expressions['_id']]])
-        transducer.compact
-      else
-        transducer = Transducer.new(@documents)
-
-        expressions.each do |expression|
-          if (matcher = factory(*expression))
-            transducer.filter(&matcher)
-          end
+      expressions.each do |expression|
+        if (matcher = factory(*expression))
+          transducer.filter(&matcher)
         end
-
-        # Keep only the document
-        transducer.map{|id, doc| doc}
       end
 
       if (sort_fields = options['sort'])
@@ -74,20 +62,20 @@ module HydroponicMongo
     end
 
     def expression(field_name, expr)
-      -> ((id, doc)) {
-        evaluate(id, doc, expr, field_name.split('.', -1))
+      -> (doc) {
+        evaluate(doc, expr, field_name.split('.', -1))
       }
     end
 
-    def evaluate(id, doc, expr, path)
+    def evaluate(doc, expr, path)
       first, *rest = path
 
       case doc
       when Hash
         if first.nil?
-          return HashExpr.resolve(self, id, doc, expr)
+          return HashExpr.resolve(self, doc, expr)
         elsif doc.key?(first)
-          return evaluate(first, doc[first], expr, rest)
+          return evaluate(doc[first], expr, rest)
         else
           check_nonexistent_or_negative(expr)
         end
@@ -95,13 +83,13 @@ module HydroponicMongo
       when Array
         index = first.to_i if first.to_i.to_s == first
         if first.nil?
-          return ArrayExpr.resolve(self, id, doc, expr)
+          return ArrayExpr.resolve(self, doc, expr)
         elsif index
-          return evaluate(index, doc[index], expr, rest)
+          return evaluate(doc[index], expr, rest)
         else
           # search in array and set position if needed
           position = doc.each_with_index.find_index do |sub_doc, i|
-            evaluate(i, sub_doc, expr, path)
+            evaluate(sub_doc, expr, path)
           end
           # The first found position is stored, it may be used in an update
           # operation in place of the position operator $
@@ -113,7 +101,7 @@ module HydroponicMongo
 
       else
         if first.nil?
-          return ValueExpr.resolve(self, id, doc, expr)
+          return ValueExpr.resolve(self, doc, expr)
         else
           check_nonexistent_or_negative(expr)
         end
