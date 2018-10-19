@@ -1,7 +1,11 @@
 # frozen_string_literal: true
 
+require 'hydroponic_mongo/query/logical'
+
 module HydroponicMongo
   class Query
+    include Query::Logical
+
     attr_reader :expressions
     attr_reader :collection
     attr_reader :options
@@ -68,11 +72,11 @@ module HydroponicMongo
     def factory(key, value)
       case key
       when '$and'
-        And.to_proc(self, value)
+        and_expressions(value)
       when '$nor'
-        Nor.to_proc(self, value)
+        nor_expressions(value)
       when '$or'
-        Or.to_proc(self, value)
+        or_expressions(value)
       when '$comment'
         # Ignore
       else
@@ -126,10 +130,6 @@ module HydroponicMongo
     end
   end
 end
-
-require 'hydroponic_mongo/query/and'
-require 'hydroponic_mongo/query/or'
-require 'hydroponic_mongo/query/nor'
 
 require 'hydroponic_mongo/query/value_expr'
 require 'hydroponic_mongo/query/array_expr'
