@@ -14,7 +14,7 @@ module HydroponicMongo
       @name = name
       @options = {}
       @info = {'readOnly' => false}
-      @documents = []
+      @documents = {}
       @indices = {}
       @indices[Index::ID_INDEX_NAME] = Index.new(self, Index::ID_INDEX_NAME, {'_id' => 1})
     end
@@ -98,7 +98,7 @@ module HydroponicMongo
 
     def insert_one(document)
       id = (document['_id'] ||= BSON::ObjectId.new)
-      documents.push(document)
+      documents[id] = document
 
       return id
     end
