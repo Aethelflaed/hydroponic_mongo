@@ -46,19 +46,11 @@ module HydroponicMongo
     def find(query = {}, options = {})
       query = Query.new(query, documents, options)
 
+      result = query.documents
+
       # TODO:
       # Handle options:
       # - options['projection']
-
-      result = query.documents
-
-      if options['skip']
-        result = result[options['skip']..-1]
-      end
-
-      if options['limit']
-        result = result[0..options['limit']]
-      end
 
       return result
     end
@@ -112,26 +104,49 @@ module HydroponicMongo
       return doc
     end
 
-    def update_one(document, update, options = {})
-      if update.keys.first[0] == '$'
-        # using update operators
-        Update.apply(document, update, options)
-      else
-        # replace document
+    def delete(query, options = {})
+      query = Query.new(query, documents, options)
 
-        # make sure we don't override the _id
-        if !options['upserting']
-          update.delete('_id')
+      documents = query.documents
+      count = documents.size
+
+      documents.each do |doc|
+        self.documents.delete(doc['_id'])
+      end
+
+      return count
+    end
+
+    def update_one(document, update, options = {})
+      original_id = document['_id']
+
+      rval =
+        if update.keys.first[0] == '$'
+          # using update operators
+          Update.apply(document, update, options)
+        else
+          # replace document
+
+          # make sure we don't override the _id
+          if !options['upserting']
+            update.delete('_id')
+          end
+
+          # Delete all fields
+          document.delete_if{|k, v| k != '_id'}
+
+          # Set updates fields
+          document.merge!(update)
+
+          true
         end
 
-        # Delete all fields
-        document.delete_if{|k, v| k != '_id'}
-
-        # Set updates fields
-        document.merge!(update)
-
-        return true
+      if original_id != document['_id']
+        self.documents.delete(original_id)
+        self.documents[document['_id']] = document
       end
+
+      return rval
     end
 
     def delete_one(id)

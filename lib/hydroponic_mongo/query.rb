@@ -17,7 +17,7 @@ module HydroponicMongo
       @position = nil
     end
 
-    def documents
+    def new_transducer
       transducer = Transducer.new(@documents)
 
       expressions.each do |expression|
@@ -26,6 +26,11 @@ module HydroponicMongo
         end
       end
 
+      transducer
+    end
+
+    def documents
+      transducer = new_transducer
       # Keep only the document
       transducer.map{|id, doc| doc}
 
@@ -46,7 +51,17 @@ module HydroponicMongo
           end
         end
       end
-      transducer.to_a
+      result = transducer.to_a
+
+      if options['skip']
+        result = result[options['skip']..-1]
+      end
+
+      if options['limit'] && options['limit'] > 0
+        result = result[0..options['limit']]
+      end
+
+      return result
     end
 
     def factory(key, value)

@@ -66,6 +66,8 @@ module HydroponicMongo
         collection_update(command)
       when 'findAndModify'
         collection_findAndModify(command)
+      when 'delete'
+        collection_delete(command)
       else
         return false
       end

@@ -89,6 +89,27 @@ module HydroponicMongo
 
         reply_hash(rval)
       end
+
+      def collection_delete(cmd)
+        rval = {'n' => 0}
+        n = 0
+
+        cmd['deletes'].each_with_index do |delete, index|
+          begin
+            n = collection.delete(delete['q'], delete)
+            rval['n'] += n
+          rescue HydroponicMongo::WriteError => e
+            rval['writeErrors'] ||= []
+            rval['writeErrors'].push({
+              'index'  => index,
+              'code'   => e.code,
+              'errmsg' => e.messag
+            })
+          end
+        end
+
+        reply_hash(rval)
+      end
     end
   end
 end
