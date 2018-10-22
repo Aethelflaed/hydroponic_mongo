@@ -52,7 +52,7 @@ module HydroponicMongo
       # Handle options:
       # - options['projection']
 
-      return result
+      return result.deep_dup
     end
 
     def update(query, update, options = {})
