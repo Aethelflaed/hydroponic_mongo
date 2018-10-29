@@ -29,6 +29,10 @@ module HydroponicMongo
       define_method('$nin') do |doc, arg|
         (doc & arg).empty?
       end
+
+      define_method('$size') do |doc, arg|
+        doc.size == arg
+      end
     end
   end
 end

@@ -20,6 +20,12 @@ module HydroponicMongo
       test '$nin' do
         assert ArrayExpr.public_send('$nin', [3], [1, 2])
       end
+
+      test '$size' do
+        assert ArrayExpr.public_send('$size', [], 0)
+        assert_not ArrayExpr.public_send('$size', [], 1)
+        assert ArrayExpr.public_send('$size', [1, 2, 3], 3)
+      end
     end
   end
 end
