@@ -33,6 +33,19 @@ module HydroponicMongo
       define_method('$size') do |doc, arg|
         doc.size == arg
       end
+
+      define_method('$elemMatch') do |doc, arg|
+        if arg.keys.first.start_with?('$')
+          doc = doc.each_with_index.map{|o, i| [i, {'_' => o}]}
+          arg = {'_' => arg}
+        else
+          doc = doc.each_with_index.map{|o, i| [i, o]}
+        end
+
+        transducer = Query.new(arg, doc).new_transducer
+
+        transducer.reduce :any?
+      end
     end
   end
 end
