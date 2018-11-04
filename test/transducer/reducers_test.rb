@@ -11,6 +11,21 @@ class Transducer
       assert_equal [1], initial
     end
 
+    test 'uniq' do
+      initial, reducer = Reducers.uniq
+
+      assert_equal [], initial
+
+      reducer.call(initial, 1)
+      assert_equal [1], initial
+
+      reducer.call(initial, 1)
+      assert_equal [1], initial
+
+      reducer.call(initial, 2)
+      assert_equal [1, 2], initial
+    end
+
     test 'sum' do
       initial, reducer = Reducers.instance_exec do
         sum 0

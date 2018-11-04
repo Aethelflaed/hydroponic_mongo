@@ -19,6 +19,15 @@ class Transducer
     end
     alias_method :to_a, :push
 
+    # Create a new array containing each reduced element if it's not already
+    # present in the array
+    #
+    # Aliased as :distinct
+    def uniq
+      [[], -> list, item {list.push(item) if !list.include?(item)}]
+    end
+    alias_method :distinct, :uniq
+
     # Sum each reduced element.
     #
     # You can provide the initial value (defaults to 0).
