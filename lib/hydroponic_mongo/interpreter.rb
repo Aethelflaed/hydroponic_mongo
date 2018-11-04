@@ -29,7 +29,7 @@ module HydroponicMongo
       if payload['database_name']
         handle_database(payload)
       else
-        raise StandardError.new("Check how to handle command: #{payload.inspect}")
+        raise CommandNotImplementedError.new(payload)
       end
     end
 

@@ -11,7 +11,7 @@ module HydroponicMongo
             if respond_to?(op)
               public_send(op, doc, arg)
             else
-              raise StandardError.new("In query #{query.inspect}, don't know how to handle #{op} => #{arg} for #{doc}")
+              QueryOperatorNotImplementedError.new(query, op, arg, doc)
             end
           end
         else

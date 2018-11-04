@@ -20,7 +20,7 @@ module HydroponicMongo
             end
           end
         else
-          raise NotImplementedError.new("Not implemented update operator #{op}")
+          raise UpdateOperatorNotImplementedError.new(op)
         end
       end
 
