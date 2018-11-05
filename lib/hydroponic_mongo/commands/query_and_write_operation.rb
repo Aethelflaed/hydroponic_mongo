@@ -2,23 +2,19 @@
 
 module HydroponicMongo
   module Commands
-    module Collection
-      def collection_insert(cmd)
+    module QueryAndWriteOperation
+      extend Base
+
+      command 'insert' do
         reply_hash({'n' => collection.insert(cmd['documents'])})
       end
 
-      def collection_find(cmd)
+      command 'find' do
         cursor("#{database.name}.#{collection.name}",
                collection.find(cmd['filter'], cmd))
       end
 
-      def collection_count(cmd)
-        reply_hash({
-          'n' => collection.find(cmd['query'], cmd).count
-        })
-      end
-
-      def collection_update(cmd)
+      command 'update' do
         rval = {'n' => 0, 'nModified' => 0}
         n, nModified = 0, 0
         upserted = []
@@ -51,7 +47,7 @@ module HydroponicMongo
         reply_hash(rval)
       end
 
-      def collection_findAndModify(cmd)
+      command 'findAndModify' do
         rval = {
           'value' => nil,
           'lastErrorObject' => {
@@ -90,7 +86,7 @@ module HydroponicMongo
         reply_hash(rval)
       end
 
-      def collection_delete(cmd)
+      command 'delete' do
         rval = {'n' => 0}
         n = 0
 

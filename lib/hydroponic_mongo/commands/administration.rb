@@ -2,13 +2,15 @@
 
 module HydroponicMongo
   module Commands
-    module Database
-      def database_listCollections
+    module Administration
+      extend Base
+
+      command 'listCollections' do
         cursor("#{database.name}.$cmd.listCollections",
                database.collections.values)
       end
 
-      def database_drop
+      command 'drop' do
         database.drop
 
         reply_hash({'dropped' => database.name})

@@ -8,7 +8,6 @@ module HydroponicMongo
     include Commands
 
     attr_reader :server, :connection
-    attr_reader :database, :collection
 
     def initialize(server, connection)
       @server = server
@@ -24,57 +23,37 @@ module HydroponicMongo
     end
 
     def handle(message)
-      payload = message.payload
+      @payload = message.payload
+      @cmd = payload['command']
 
-      if payload['database_name']
-        handle_database(payload)
+      method = "$cmd.#{payload['command_name']}"
+      if respond_to?(method)
+        public_send(method)
       else
         raise CommandNotImplementedError.new(payload)
       end
+
+    ensure
+      @payload, @cmd = nil, nil
+      @database, @collection = nil, nil
     end
 
-    def handle_database(payload)
-      @database = server.databases[payload['database_name']]
+    attr_reader :payload, :cmd
 
-      case payload['command_name'].to_s
-      when 'listCollections'
-        database_listCollections
-      when 'dropDatabase'
-        database_drop
-      else
-        if !handle_collection(payload)
-          raise StandardError.new("Check how to handle database command: #{payload.inspect}")
-        end
+    def database
+      if payload
+        @database ||= server.databases[payload['database_name']]
       end
-    ensure
-      @database = nil
     end
 
-    def handle_collection(payload)
-      command = payload['command']
-      collection_name = command[payload['command_name'].to_s]
-      @collection = database[collection_name]
-
-      case payload['command_name'].to_s
-      when 'insert'
-        collection_insert(command)
-      when 'find'
-        collection_find(command)
-      when 'count'
-        collection_count(command)
-      when 'update'
-        collection_update(command)
-      when 'findAndModify'
-        collection_findAndModify(command)
-      when 'delete'
-        collection_delete(command)
-      else
-        return false
+    def collection
+      if database
+        @collection ||=
+          begin
+            collection_name = payload['command'][payload['command_name'].to_s]
+            database[collection_name]
+          end
       end
-
-      return true
-    ensure
-      @collection = nil
     end
   end
 end
