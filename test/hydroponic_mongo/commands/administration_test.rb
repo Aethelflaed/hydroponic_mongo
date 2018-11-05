@@ -26,11 +26,11 @@ module HydroponicMongo
         assert_equal database['foo'].to_bson, bson['firstBatch'][0]
       end
 
-      test 'drop' do
+      test 'dropDatabase' do
         dtb = database
 
         assert_hash_reply do
-          cmd('drop')
+          cmd('dropDatabase')
         end
 
         assert_not Database.all.key?(dtb.name)

@@ -10,7 +10,7 @@ module HydroponicMongo
                      database.collections.values)
       end
 
-      command 'drop' do
+      command 'dropDatabase' do
         database.drop
 
         reply_hash({'dropped' => database.name})
