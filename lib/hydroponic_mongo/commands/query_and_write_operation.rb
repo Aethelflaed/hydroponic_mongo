@@ -6,7 +6,10 @@ module HydroponicMongo
       extend Base
 
       command 'insert' do
-        reply_hash({'n' => collection.insert(cmd['documents'])})
+        n = cmd['documents'].map do |document|
+          collection.insert_one(document)
+        end.uniq.count
+        reply_hash({'n' => n})
       end
 
       command 'find' do

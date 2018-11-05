@@ -37,12 +37,6 @@ module HydroponicMongo
       end
     end
 
-    def insert(documents)
-      documents.map do |document|
-        insert_one(document)
-      end.uniq.count
-    end
-
     def find(query = nil, options = {})
       query = Query.new(query || {}, documents, options)
 
