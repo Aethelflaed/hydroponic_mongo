@@ -14,7 +14,7 @@ module HydroponicMongo
       @connection = connection
     end
 
-    def cursor(name, data)
+    def reply_cursor(name, data)
       connection.reply Reply::Cursor.new(name, data)
     end
 
@@ -42,7 +42,7 @@ module HydroponicMongo
 
     def database
       if payload
-        @database ||= server.databases[payload['database_name']]
+        @database ||= Database.new(payload['database_name'])
       end
     end
 

@@ -43,8 +43,8 @@ module HydroponicMongo
       end.uniq.count
     end
 
-    def find(query = {}, options = {})
-      query = Query.new(query, documents, options)
+    def find(query = nil, options = {})
+      query = Query.new(query || {}, documents, options)
 
       result = query.documents
 

@@ -6,8 +6,8 @@ module HydroponicMongo
       extend Base
 
       command 'listCollections' do
-        cursor("#{database.name}.$cmd.listCollections",
-               database.collections.values)
+        reply_cursor("#{database.name}.$cmd.listCollections",
+                     database.collections.values)
       end
 
       command 'drop' do

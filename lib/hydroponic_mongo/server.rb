@@ -28,9 +28,5 @@ module HydroponicMongo
     def pool
       @connection ||= HydroponicMongo::Connection.new(self, self.options)
     end
-
-    def dropDatabase(name)
-      @databases.delete(name)
-    end
   end
 end

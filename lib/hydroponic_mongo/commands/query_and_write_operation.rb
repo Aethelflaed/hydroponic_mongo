@@ -10,8 +10,8 @@ module HydroponicMongo
       end
 
       command 'find' do
-        cursor("#{database.name}.#{collection.name}",
-               collection.find(cmd['filter'], cmd))
+        reply_cursor("#{database.name}.#{collection.name}",
+                     collection.find(cmd['filter'], cmd))
       end
 
       command 'update' do
