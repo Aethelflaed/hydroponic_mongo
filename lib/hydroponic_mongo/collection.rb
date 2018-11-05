@@ -98,19 +98,6 @@ module HydroponicMongo
       return doc
     end
 
-    def delete(query, options = {})
-      query = Query.new(query, documents, options)
-
-      documents = query.documents
-      count = documents.size
-
-      documents.each do |doc|
-        self.documents.delete(doc['_id'])
-      end
-
-      return count
-    end
-
     def update_one(document, update, options = {})
       original_id = document['_id']
 

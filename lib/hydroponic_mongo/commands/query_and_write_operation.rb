@@ -95,8 +95,13 @@ module HydroponicMongo
 
         cmd['deletes'].each_with_index do |delete, index|
           begin
-            n = collection.delete(delete['q'], delete)
-            rval['n'] += n
+            query = Query.new(delete['q'], collection.documents, delete)
+
+            query.documents.each do |doc|
+              collection.delete_one(doc['_id'])
+              rval['n'] += 1
+            end
+
           rescue HydroponicMongo::WriteError => e
             rval['writeErrors'] ||= []
             rval['writeErrors'].push({
