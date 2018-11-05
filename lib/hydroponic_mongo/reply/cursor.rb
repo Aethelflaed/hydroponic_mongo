@@ -2,6 +2,8 @@
 
 module HydroponicMongo
   class Reply::Cursor < Reply
+    attr_reader :ns, :data
+
     def initialize(ns, data)
       @ns = ns
       @data = data

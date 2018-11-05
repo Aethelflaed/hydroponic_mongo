@@ -12,6 +12,8 @@ require "hydroponic_mongo"
 
 Mongo::Logger.logger = Logger.new(File.open(File.expand_path('../../log/test.log', __FILE__), 'a+'))
 
+require_relative 'support/commands_test_helper'
+
 Mongo.hydroponic!
 
 require "minitest/autorun"
