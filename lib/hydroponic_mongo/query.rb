@@ -133,6 +133,8 @@ module HydroponicMongo
         negative = expr.all? {|op, _| ['$not', '$nin', '$ne'].include?(op) }
 
         return nonexistent || negative
+      when nil
+        return true
       else
         return false
       end
