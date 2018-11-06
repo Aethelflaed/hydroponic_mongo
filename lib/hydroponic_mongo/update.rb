@@ -159,6 +159,23 @@ module HydroponicMongo
       end
     end
 
+    define_method('$pullAll') do |document, key, value|
+      if !document.key?(key)
+        return false
+      elsif !document[key].is_a?(Array)
+        raise ArrayExpected.new
+      end
+
+      modified = false
+
+      value.each do |val|
+        modified ||= document[key].include?(val)
+        document[key].delete(val)
+      end
+
+      return modified
+    end
+
     define_method('$addToSet') do |document, key, value|
       if !document.key?(key)
         document[key] = []
