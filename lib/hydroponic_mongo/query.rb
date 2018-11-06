@@ -54,7 +54,11 @@ module HydroponicMongo
       result = transducer.to_a
 
       if options['skip']
-        result = result[options['skip']..-1]
+        if options['skip'] > result.count
+          result = []
+        else
+          result = result[options['skip']..-1]
+        end
       end
 
       if options['limit'] && options['limit'] > 0
