@@ -117,6 +117,10 @@ module HydroponicMongo
       end
     end
 
+    define_method('$pushAll') do |document, key, value|
+      public_send('$push', document, key, {'$each' => value})
+    end
+
     define_method('$pull') do |document, key, value|
       if !document.key?(key)
         return false

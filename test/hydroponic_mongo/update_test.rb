@@ -126,6 +126,12 @@ module HydroponicMongo
       assert_equal [{'a' => 3}, {'a' => 2}, {'a' => 1}, {'a' => 0}], doc['b']
     end
 
+    test '$pushAll' do
+      doc = {'a' => [1]}
+      assert Update.public_send('$pushAll', doc, 'a', [2, 3])
+      assert_equal [1, 2, 3], doc['a']
+    end
+
     test '$pull' do
       doc = {
         'a' => [1, 2],
