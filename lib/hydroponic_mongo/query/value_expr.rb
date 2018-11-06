@@ -20,7 +20,11 @@ module HydroponicMongo
       end
 
       define_method('$eq') do |doc, arg|
-        doc == arg
+        if arg.is_a?(Regexp)
+          doc =~ arg
+        else
+          doc == arg
+        end
       end
 
       define_method('$ne') do |doc, arg|

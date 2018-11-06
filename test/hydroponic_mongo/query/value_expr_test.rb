@@ -5,6 +5,7 @@ module HydroponicMongo
     class ValueExprTest < ActiveSupport::TestCase
       test '$eq' do
         assert ValueExpr.public_send('$eq', 1, 1)
+        assert ValueExpr.public_send('$eq', 'hello', /[a-z]+/)
       end
 
       test '$ne' do
