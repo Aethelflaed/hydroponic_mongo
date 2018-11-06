@@ -126,6 +126,39 @@ module HydroponicMongo
       assert_equal [{'a' => 3}, {'a' => 2}, {'a' => 1}, {'a' => 0}], doc['b']
     end
 
+    test '$pull' do
+      doc = {
+        'a' => [1, 2],
+        'b' => 1,
+        'c' => [
+          {'x' => 1, 'y' => 2},
+          {'x' => 2, 'y' => 4}
+        ],
+      }
+      assert_not Update.public_send('$pull', doc, 'z', 1)
+
+      assert_raise(Update::ArrayExpected) do
+        Update.public_send('$pull', doc, 'b', 1)
+      end
+
+      assert Update.public_send('$pull', doc, 'a', 1)
+      assert_equal [2], doc['a']
+
+      assert_not Update.public_send('$pull', doc, 'a', 1)
+      assert_equal [2], doc['a']
+
+      assert_not Update.public_send('$pull', doc, 'a', {'$gt' => 2})
+      assert_equal [2], doc['a']
+
+      assert Update.public_send('$pull', doc, 'a', {'$eq' => 2})
+      assert_equal [], doc['a']
+
+      assert_not Update.public_send('$pull', doc, 'c', {'x' => 3})
+
+      assert Update.public_send('$pull', doc, 'c', {'x' => 1})
+      assert_equal [{'x' => 2, 'y' => 4}], doc['c']
+    end
+
     test '$addToSet' do
       doc = {}
       assert Update.public_send('$addToSet', doc, 'a', 1)

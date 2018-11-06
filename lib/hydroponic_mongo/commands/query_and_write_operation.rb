@@ -91,7 +91,6 @@ module HydroponicMongo
 
       command 'delete' do
         rval = {'n' => 0}
-        n = 0
 
         cmd['deletes'].each_with_index do |delete, index|
           begin

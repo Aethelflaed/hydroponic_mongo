@@ -117,6 +117,44 @@ module HydroponicMongo
       end
     end
 
+    define_method('$pull') do |document, key, value|
+      if !document.key?(key)
+        return false
+      elsif !document[key].is_a?(Array)
+        raise ArrayExpected.new
+      end
+
+      array = document[key]
+
+      if value.is_a?(Hash)
+        results = []
+        if value.keys.first.start_with?('$')
+          docs = array.each_with_index.map{|o, i| [i, {'_' => o}]}
+          arg = {'_' => value}
+
+          results = Query.new(arg, docs).new_transducer.map{|i, o| o['_']}.to_a
+          results.each do |val|
+            array.delete(val)
+          end
+        else
+          docs = array.each_with_index.map{|o, i| [i, o]}
+          arg = value
+
+          results = Query.new(arg, docs).new_transducer.map{|i, o| o}.to_a
+          results.each do |val|
+            array.delete(val)
+          end
+        end
+
+        return results.size > 0
+      elsif array.include?(value)
+        array.delete(value)
+        return true
+      else
+        return false
+      end
+    end
+
     define_method('$addToSet') do |document, key, value|
       if !document.key?(key)
         document[key] = []
