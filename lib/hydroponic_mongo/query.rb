@@ -95,7 +95,7 @@ module HydroponicMongo
         elsif doc.key?(first)
           return evaluate(first, doc[first], expr, rest)
         else
-          check_nonexistent_or_negative(expr)
+          return evaluate(first, nil, expr, [])
         end
 
       when Array
@@ -133,8 +133,6 @@ module HydroponicMongo
         negative = expr.all? {|op, _| ['$not', '$nin', '$ne'].include?(op) }
 
         return nonexistent || negative
-      when nil
-        return true
       else
         return false
       end
