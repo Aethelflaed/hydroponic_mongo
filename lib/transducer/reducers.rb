@@ -24,7 +24,10 @@ class Transducer
     #
     # Aliased as :distinct
     def uniq
-      [[], -> list, item {list.push(item) if !list.include?(item)}]
+      [[], -> list, item {
+        list.push(item) if !list.include?(item)
+        list
+      }]
     end
     alias_method :distinct, :uniq
 

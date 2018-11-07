@@ -16,13 +16,13 @@ class Transducer
 
       assert_equal [], initial
 
-      reducer.call(initial, 1)
+      assert_equal [1], reducer.call(initial, 1)
       assert_equal [1], initial
 
-      reducer.call(initial, 1)
+      assert_equal [1], reducer.call(initial, 1)
       assert_equal [1], initial
 
-      reducer.call(initial, 2)
+      assert_equal [1, 2], reducer.call(initial, 2)
       assert_equal [1, 2], initial
     end
 
