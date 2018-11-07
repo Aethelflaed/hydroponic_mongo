@@ -11,10 +11,16 @@ module HydroponicMongo
 
       update.each do |op, values|
         if respond_to?(op)
+          meth = method(op)
           values.each do |field, value|
             doc, key = resolve_field_path(document, field, field.split('.', -1), options)
             begin
-              modified = public_send(op, doc, key, value) || modified
+              case meth.parameters.size
+              when 3
+                modified = meth.call(doc, key, value) || modified
+              when 4
+                modified = meth.call(doc, key, value, options) || modified
+              end
             rescue ArrayExpected
               raise WriteError.new(16837, "The field '#{field}' must be an array but is of type #{doc[key].class} in document {_id: #{document['_id']}}")
             end
@@ -29,6 +35,13 @@ module HydroponicMongo
 
     define_method('$set') do |document, key, value|
       document[key] != (document[key] = value)
+    end
+
+    define_method('$setOnInsert') do |document, key, value, options|
+      if options['upserting']
+        document[key] = value
+        true
+      end
     end
 
     define_method('$inc') do |document, key, value|

@@ -18,8 +18,20 @@ module HydroponicMongo
         },
         '$push' => {
           'a' => {'$each' => [1, 2, 3], '$sort' => -1, '$slice' => 2}
-        }
+        },
+        '$setOnInsert' => {
+          'z' => 1
+        },
       }, {})
+
+      assert_not doc.key?('z')
+
+      Update.apply(doc, {
+        '$setOnInsert' => {
+          'z' => 1
+        },
+      }, {'upserting' => true})
+      assert doc.key?('z')
 
       assert_raise(WriteError) do
         Update.apply(doc, {
@@ -35,6 +47,15 @@ module HydroponicMongo
       assert_equal 1, doc[:a]
 
       assert_not Update.public_send('$set', doc, :a, 1)
+    end
+
+    test '$setOnInsert' do
+      doc = {}
+      assert_not Update.public_send('$setOnInsert', doc, :a, 1, {})
+      assert_equal({}, doc)
+
+      assert Update.public_send('$setOnInsert', doc, :a, 1, {'upserting' => true})
+      assert_equal({a: 1}, doc)
     end
 
     test '$inc' do
