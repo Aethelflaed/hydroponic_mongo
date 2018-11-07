@@ -8,13 +8,13 @@ module HydroponicMongo
 
       test 'listCollections' do
         assert_cursor_reply do
-          cmd('listCollections')
+          send_command('listCollections')
         end
         assert_equal [], last_reply.data
 
         database['foo']
 
-        cmd('listCollections')
+        send_command('listCollections')
         assert_equal 1, last_reply.data.count
         assert_equal "#{database.name}.$cmd.listCollections", last_reply.ns
 
@@ -30,7 +30,7 @@ module HydroponicMongo
         dtb = database
 
         assert_hash_reply do
-          cmd('dropDatabase')
+          send_command('dropDatabase')
         end
 
         assert_not Database.all.key?(dtb.name)

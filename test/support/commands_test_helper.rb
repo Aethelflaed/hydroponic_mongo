@@ -3,20 +3,33 @@ module CommandsTestHelper
 
   included do
     setup do
+      @cmd = {}
       @replies = []
+      @collection = nil
+      @database = nil
     end
 
     teardown do
+      @collection = nil
       @database&.drop
       @database = nil
     end
+  end
+
+  def cmd
+    @cmd ||= {}
   end
 
   def database
     @database ||= HydroponicMongo::Database.new("#{self.class.name.underscore}_#{@NAME}")
   end
 
-  def cmd(name)
+  def collection
+    @collection ||= database[@NAME]
+  end
+
+  def send_command(name)
+    cmd[name.to_s] = @NAME
     public_send("$cmd.#{name}")
   end
 
