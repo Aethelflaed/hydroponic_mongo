@@ -64,25 +64,27 @@ module HydroponicMongo
           query_options['sort'] = cmd['sort']
         end
 
-        document = collection.find(cmd['query'], query_options).first
+        query = Query.new(cmd['query'] || {}, collection.documents, query_options)
+        document = query.documents.first
 
         if document
-          rval['value'] = document
+          rval['value'] = document.deep_dup
 
           if cmd['remove']
             collection.delete_one(document['_id'])
           else # update
-            if !cmd['new']
-              rval['value'] = document.deep_dup
-            end
             rval['lastErrorObject']['updatedExisting'] = true
             collection.update_one(document, cmd['update'])
+
+            if cmd['new']
+              rval['value'] = document.deep_dup
+            end
           end
         elsif !cmd['remove'] && cmd['upsert']
           doc = collection.upsert(cmd['update'], cmd)
           rval['lastErrorObject']['upserted'] = doc['_id']
           if cmd['new']
-            rval['value'] = doc
+            rval['value'] = doc.deep_dup
           end
         end
 
