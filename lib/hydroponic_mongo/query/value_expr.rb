@@ -32,19 +32,19 @@ module HydroponicMongo
       end
 
       define_method('$gt') do |doc, arg|
-        doc > arg
+        !doc.nil? && doc > arg
       end
 
       define_method('$gte') do |doc, arg|
-        doc >= arg
+        !doc.nil? && doc >= arg
       end
 
       define_method('$lt') do |doc, arg|
-        doc < arg
+        !doc.nil? && doc < arg
       end
 
       define_method('$lte') do |doc, arg|
-        doc <= arg
+        !doc.nil? && doc <= arg
       end
 
       define_method('$in') do |doc, arg|
