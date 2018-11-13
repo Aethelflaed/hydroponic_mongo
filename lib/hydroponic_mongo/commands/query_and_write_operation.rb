@@ -59,7 +59,7 @@ module HydroponicMongo
           }
         }
 
-        query_options = {}
+        query_options = {'limit' => 1}
         if cmd['sort']
           query_options['sort'] = cmd['sort']
         end

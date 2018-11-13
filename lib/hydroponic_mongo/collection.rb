@@ -108,12 +108,12 @@ module HydroponicMongo
         else
           # replace document
 
-          # make sure we don't override the _id
+          # make sure we don't override the _id, unless we're upserting
           if !options['upserting']
             update.delete('_id')
           end
 
-          # Delete all fields
+          # Delete all fields except _id
           document.delete_if{|k, v| k != '_id'}
 
           # Set updates fields
@@ -122,7 +122,7 @@ module HydroponicMongo
           true
         end
 
-      if original_id != document['_id']
+      if original_id && original_id != document['_id']
         self.documents.delete(original_id)
         self.documents[document['_id']] = document
       end
