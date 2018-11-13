@@ -11,26 +11,24 @@ module HydroponicMongo
     attr_reader :position
 
     def initialize(expressions, documents, options = {})
-      @expressions = expressions
+      @expressions = expressions || {}
       @documents = documents
       @options = options
       @position = nil
     end
 
-    def new_transducer
-      transducer = Transducer.new(@documents)
-
-      expressions.each do |expression|
-        if (matcher = factory(*expression))
-          transducer.filter(&matcher)
+    def transducer
+      Transducer.new(@documents).tap do |transducer|
+        expressions.each do |expression|
+          if (matcher = factory(*expression))
+            transducer.filter(&matcher)
+          end
         end
       end
-
-      transducer
     end
 
     def documents
-      transducer = new_transducer
+      transducer = self.transducer
       # Keep only the document
       transducer.map{|id, doc| doc}
 

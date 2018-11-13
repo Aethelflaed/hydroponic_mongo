@@ -42,9 +42,7 @@ module HydroponicMongo
           doc = doc.each_with_index.map{|o, i| [i, o]}
         end
 
-        transducer = Query.new(arg, doc).new_transducer
-
-        transducer.reduce :any?
+        Query.new(arg, doc).transducer.reduce :any?
       end
     end
   end

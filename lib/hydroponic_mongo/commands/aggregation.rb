@@ -15,7 +15,7 @@ module HydroponicMongo
         path = cmd['key'].split('.', -1)
 
         query = Query.new(cmd['query'] || {}, collection.documents)
-        transducer = query.new_transducer
+        transducer = query.transducer
         transducer.map do |id, doc|
           value_at_path(doc, path)
         end

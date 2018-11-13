@@ -149,7 +149,7 @@ module HydroponicMongo
           docs = array.each_with_index.map{|o, i| [i, {'_' => o}]}
           arg = {'_' => value}
 
-          results = Query.new(arg, docs).new_transducer.map{|i, o| o['_']}.to_a
+          results = Query.new(arg, docs).transducer.map{|i, o| o['_']}.to_a
           results.each do |val|
             array.delete(val)
           end
@@ -157,7 +157,7 @@ module HydroponicMongo
           docs = array.each_with_index.map{|o, i| [i, o]}
           arg = value
 
-          results = Query.new(arg, docs).new_transducer.map{|i, o| o}.to_a
+          results = Query.new(arg, docs).transducer.map{|i, o| o}.to_a
           results.each do |val|
             array.delete(val)
           end
