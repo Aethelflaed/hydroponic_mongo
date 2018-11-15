@@ -6,7 +6,7 @@ module HydroponicMongo
 
     def initialize(ns, data)
       @ns = ns
-      @data = data
+      @data = data.deep_dup
     end
 
     def data_to_bson

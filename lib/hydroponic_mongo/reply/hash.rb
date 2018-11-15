@@ -3,7 +3,7 @@ module HydroponicMongo
     attr_reader :data
 
     def initialize(data)
-      @data = data
+      @data = data.deep_dup
     end
 
     def to_bson

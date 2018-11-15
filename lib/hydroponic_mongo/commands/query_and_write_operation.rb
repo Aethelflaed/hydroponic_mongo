@@ -68,7 +68,7 @@ module HydroponicMongo
         document = query.documents.first
 
         if document
-          rval['value'] = document.deep_dup
+          rval['value'] = document
 
           if cmd['remove']
             collection.delete_one(document['_id'])
@@ -77,14 +77,14 @@ module HydroponicMongo
             collection.update_one(document, cmd['update'])
 
             if cmd['new']
-              rval['value'] = document.deep_dup
+              rval['value'] = document
             end
           end
         elsif !cmd['remove'] && cmd['upsert']
           doc = collection.upsert(cmd['update'], cmd)
           rval['lastErrorObject']['upserted'] = doc['_id']
           if cmd['new']
-            rval['value'] = doc.deep_dup
+            rval['value'] = doc
           end
         end
 

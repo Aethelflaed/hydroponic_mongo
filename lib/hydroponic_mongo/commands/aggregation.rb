@@ -26,7 +26,7 @@ module HydroponicMongo
 
         result = transducer.reduce :distinct
 
-        reply_hash({'values' => result.deep_dup})
+        reply_hash({'values' => result})
       end
 
       def value_at_path(doc, path)
