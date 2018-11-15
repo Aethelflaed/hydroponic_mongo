@@ -8,6 +8,11 @@ module HydroponicMongo
         assert ValueExpr.public_send('$eq', 'hello', /[a-z]+/)
       end
 
+      test '$regex' do
+        assert ValueExpr.public_send('$regex', 'hello', /[a-z]+/)
+        assert ValueExpr.public_send('$regex', 'hello', '[a-z]+')
+      end
+
       test '$ne' do
         assert_not ValueExpr.public_send('$ne', 1, 1)
       end

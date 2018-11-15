@@ -27,6 +27,10 @@ module HydroponicMongo
         end
       end
 
+      define_method('$regex') do |doc, arg|
+        doc =~ Regexp.new(arg)
+      end
+
       define_method('$ne') do |doc, arg|
         doc != arg
       end
