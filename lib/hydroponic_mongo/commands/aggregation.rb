@@ -6,8 +6,10 @@ module HydroponicMongo
       extend Base
 
       command 'count' do
+        query = Query.new(cmd['query'], collection.documents, cmd)
+
         reply_hash({
-          'n' => collection.find(cmd['query'], cmd).count
+          'n' => query.documents.count
         })
       end
 

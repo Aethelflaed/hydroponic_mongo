@@ -13,8 +13,14 @@ module HydroponicMongo
       end
 
       command 'find' do
+        query = Query.new(cmd['filter'], collection.documents, cmd)
+
+        # TODO:
+        # Handle options:
+        # - cmd['projection']
+
         reply_cursor("#{database.name}.#{collection.name}",
-                     collection.find(cmd['filter'], cmd))
+                     query.documents)
       end
 
       command 'update' do
@@ -64,7 +70,7 @@ module HydroponicMongo
           query_options['sort'] = cmd['sort']
         end
 
-        query = Query.new(cmd['query'] || {}, collection.documents, query_options)
+        query = Query.new(cmd['query'], collection.documents, query_options)
         document = query.documents.first
 
         if document

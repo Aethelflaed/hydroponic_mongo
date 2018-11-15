@@ -37,18 +37,6 @@ module HydroponicMongo
       end
     end
 
-    def find(query = nil, options = {})
-      query = Query.new(query || {}, documents, options)
-
-      result = query.documents
-
-      # TODO:
-      # Handle options:
-      # - options['projection']
-
-      return result
-    end
-
     def update(query, update, options = {})
       query_options = {}
       if !options['multi']
